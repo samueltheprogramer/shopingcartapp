@@ -43,6 +43,10 @@ export const Shop = () => {
     <div className="border-black border-2 m-2 bg-white">
       <div className="shopTitle text-xl">
         <h1>shop here !!</h1>
+        <h2>
+          {" "}
+          hint: After adding go to Auth page and relode page and come back
+        </h2>
       </div>
 
       <div className="grid grid-cols-2  ">
