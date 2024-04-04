@@ -1,6 +1,5 @@
 .shopTitle {
   text-align: center;
-  font-size: 10px;
 }
 .products {
   width: 250px;
@@ -14,7 +13,7 @@
   border-radius: 15px;
   width: 150px;
   height: 250px;
-  margin: 10px;
+  margin: 5px;
   display: flex;
   flex-direction: column;
   justify-content: center;

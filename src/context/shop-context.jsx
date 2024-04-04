@@ -1,25 +1,49 @@
 import { createContext, useEffect, useState } from "react";
-import { PRODUCTS } from "../products";
+import { db } from "../config/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export const ShopContext = createContext(null);
 
-const getDefaultCart = () => {
-  let cart = {};
-  for (let i = 1; i < PRODUCTS.length + 1; i++) {
-    cart[i] = 0;
-  }
-  return cart;
-};
-
 export const ShopContextProvider = (props) => {
-  const [cartItems, setCartItems] = useState(getDefaultCart());
+  const [PRODUCTS, setPRODUCTS] = useState([]);
+  const [cartItems, setCartItems] = useState({});
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsCollectionRef = collection(db, "products");
+        const data = await getDocs(productsCollectionRef);
+        const productsData = data.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setPRODUCTS(productsData);
+        setCartItems(getDefaultCart(productsData));
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const getDefaultCart = (products) => {
+    const cart = {};
+    products.forEach((product) => {
+      cart[product.id] = 0;
+    });
+    return cart;
+  };
 
   const getTotalCartAmount = () => {
     let totalAmount = 0;
-    for (const item in cartItems) {
-      if (cartItems[item] > 0) {
-        let itemInfo = PRODUCTS.find((product) => product.id === Number(item));
-        totalAmount += cartItems[item] * itemInfo.price;
+    for (const itemId in cartItems) {
+      const itemQuantity = cartItems[itemId];
+      if (itemQuantity > 0) {
+        const itemInfo = PRODUCTS.find((product) => product.id === itemId);
+        if (itemInfo) {
+          totalAmount += itemQuantity * itemInfo.price;
+        }
       }
     }
     return totalAmount;
@@ -38,7 +62,7 @@ export const ShopContextProvider = (props) => {
   };
 
   const checkout = () => {
-    setCartItems(getDefaultCart());
+    setCartItems(getDefaultCart(PRODUCTS));
   };
 
   const contextValue = {
@@ -48,6 +72,7 @@ export const ShopContextProvider = (props) => {
     removeFromCart,
     getTotalCartAmount,
     checkout,
+    PRODUCTS,
   };
 
   return (
